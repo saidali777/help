@@ -1,36 +1,37 @@
-# bot.py
-
-from pyrogram import Client
+from pyrogram import Client, filters
 from flask import Flask
 import threading
 import os
 
-# --- Flask web app to keep Koyeb happy ---
+# Flask server for Koyeb health check
 app = Flask(__name__)
 
 @app.route("/")
 def index():
-    return "Pyrogram bot is running!"
+    return "Bot is running!"
 
+# Run Flask in a separate thread
 def run_web():
     port = int(os.getenv("PORT", 8000))
     app.run(host="0.0.0.0", port=port)
 
-# --- Start Flask in a background thread ---
 threading.Thread(target=run_web).start()
 
-# --- Start the Pyrogram bot ---
-API_ID = int(os.getenv("API_ID", "your_api_id"))
-API_HASH = os.getenv("API_HASH", "your_api_hash")
-BOT_TOKEN = os.getenv("BOT_TOKEN", "your_bot_token")
+# Bot credentials
+API_ID = int(os.getenv("API_ID"))
+API_HASH = os.getenv("API_HASH")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 
-bot = Client(
-    "my_bot",
-    api_id=API_ID,
-    api_hash=API_HASH,
-    bot_token=BOT_TOKEN
-)
+# Initialize Pyrogram bot
+bot = Client("my_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
+
+# 🔥 Add this: A simple handler that replies to all private messages
+@bot.on_message(filters.private & filters.text)
+def reply(client, message):
+    message.reply_text("Hello! I am alive and working on Koyeb 🚀")
 
 bot.run()
+
+
 
 
