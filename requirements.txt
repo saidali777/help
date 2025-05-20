@@ -1,1 +1,4 @@
+pyrogram==2.3.8
+tgcrypto
+motor
 
