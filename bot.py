@@ -1,26 +1,36 @@
+# bot.py
+
 from pyrogram import Client
-from config import API_ID, API_HASH, BOT_TOKEN
+from flask import Flask
+import threading
+import os
 
-class Bot(Client):
-    def __init__(self):
-        super().__init__(
-            "helper_bot",
-            api_id=API_ID,
-            api_hash=API_HASH,
-            bot_token=BOT_TOKEN,
-            plugins=dict(root="plugins"),
-            workers=50,
-            sleep_threshold=10
-        )
+# --- Flask web app to keep Koyeb happy ---
+app = Flask(__name__)
 
-    async def start(self):
-        await super().start()
-        me = await self.get_me()
-        print(f"Bot started as @{me.username}")
+@app.route("/")
+def index():
+    return "Pyrogram bot is running!"
 
-    async def stop(self, *args):
-        await super().stop()
-        print("Bot stopped")
+def run_web():
+    port = int(os.getenv("PORT", 8000))
+    app.run(host="0.0.0.0", port=port)
 
-Bot().run()
+# --- Start Flask in a background thread ---
+threading.Thread(target=run_web).start()
+
+# --- Start the Pyrogram bot ---
+API_ID = int(os.getenv("API_ID", "your_api_id"))
+API_HASH = os.getenv("API_HASH", "your_api_hash")
+BOT_TOKEN = os.getenv("BOT_TOKEN", "your_bot_token")
+
+bot = Client(
+    "my_bot",
+    api_id=API_ID,
+    api_hash=API_HASH,
+    bot_token=BOT_TOKEN
+)
+
+bot.run()
+
 
